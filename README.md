@@ -1,7 +1,7 @@
 # 목차
 - [java.lang.Iterable](#iterable) interface
 	- [java.util.Collection](#collection) interface
-		- Set interface
+		- [Set](#set) interface
 			- HashSet class
 			- LinkedHashSet class
 			- SortedSet interface
@@ -95,4 +95,15 @@ public interface Collection<E> extends Iterable<E>{
 	default Stream<E> parallelStream(){//구현부 생략}
 }
 ```
-	
+
+## Set
+```java
+//중복 엘레멘트를 포함하지 않는 컬렉션. 최대 1개의 null 엘레멘트를 가질 수 있다.
+public interface Set<E> extends Collection<E> {
+	/*
+	Collection interface와 동일하며 다음과 같은 차이가 있다.
+	1. removeIf, stream, parallelStream은 Collection의 default를 그대로 사용
+	2. spliterator() 재정의
+	*/
+}
+```
