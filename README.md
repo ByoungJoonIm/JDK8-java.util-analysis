@@ -4,7 +4,7 @@
 - [코드 분석](#코드-분석)
 	- [java.lang.Iterable](#iterable) interface
 		- [java.util.Collection](#collection) interface
-			- AbstractCollection abstract class
+			- [AbstractCollection](#abstract-class) abstract class
 			- [Set](#set) interface
 				- Abstract set abstract class
 				- HashSet class
@@ -50,6 +50,7 @@ public interface Iterable<T>{
 ```
 
 ## Collection
+### interface
 ```java
 public interface Collection<E> extends Iterable<E>{
 	//이 콜렉션의 엘레멘트 갯수 반환
@@ -109,6 +110,115 @@ public interface Collection<E> extends Iterable<E>{
 	default Stream<E> parallelStream(){//구현부 생략}
 }
 ```
+### abstract class
+```java
+//Collection interface의 몇몇 메소드가 미리 구현되어 있다.
+public abstract class AbstractCollection<E> implements Collection<E> {
+/*
+미구현부
+*/
+
+	//default 생성자
+	protected AbstractCollection() {}
+
+	//iterator 생성 부분
+	public abstract Iterator<E> iterator();
+
+	//사이즈 반환
+	public abstract int size();
+
+/*
+구현부
+*/
+
+	//해당 컬렉션이 비어있으면 true 반환
+	public boolean isEmpty() {
+		return size() == 0;
+	}
+
+	//iterator를 활용하여 순차적으로 접근하며 해당 요소가 포함된 요소인지 검사
+	public boolean contains(Object o) {
+        Iterator<E> it = iterator();
+        if (o==null) {
+            while (it.hasNext())
+                if (it.next()==null)
+                    return true;
+        } else {
+            while (it.hasNext())
+                if (o.equals(it.next()))
+                    return true;
+        }
+        return false;
+    }
+
+	// 이 배열 사이즈를 넘어가면 OutOfMemoryError 발생
+	private static final int MAX_ARRAY_SIZE = Integer.MAX_VALUE - 8;
+
+	//이터레이션 중간에 기대했던 사이즈보다 엘레멘트가 늘어난 경우 처리하는 루틴
+	@SuppressWarnings("unchecked")
+    private static <T> T[] finishToArray(T[] r, Iterator<?> it) {
+        int i = r.length;		//배열의 원래 사이즈
+        while (it.hasNext()) {	
+            int cap = r.length;						//캡은 늘어난 배열 사이즈를 의미
+            if (i == cap) {							//배열이 꽉 찬 경우
+                int newCap = cap + (cap >> 1) + 1;	//새로운 배열은 약 1.5배 늘어난 사이즈가 됨
+                // overflow-conscious code
+                /*
+				1. newCap > Integer.MAX_VALUE(overflow) ===> underflow가 일어나 조건이 참이됨
+				2. MAX_ARRAY_SIZE < newCap <= Integer.MAX_VALUE ===> 연산 결과가 양수로 참이됨
+				*/
+                if (newCap - MAX_ARRAY_SIZE > 0)	
+                    newCap = hugeCapacity(cap + 1);
+                    /*
+					newCap이 hugeCapacity에서 Integer.MAX_VALUE를 할당받은 경우 VM이
+					Arrays.copyOf에서 java.lang.OutOfMemoryError를 발생시킨다.
+					따라서 newCap의 최대 크기는 MAX_ARRAY_SIZE로 고정된다.
+					cap은 항상 MAX_ARRAY_SIZE 이하이므로 MAX_ARRAY_SIZE < Integer.MAX_VALUE 라면
+					hugeCapacity에서는 overflow가 일어나지 않지만,
+					MAX_ARRYA_SIZE가 추후 변경될 수도 있는 점이 hugeCapacity에 반영된듯 하다.
+					(minCapacity < 0 부분) 
+					*/
+                    
+                r = Arrays.copyOf(r, newCap);		//배열의 크기를 확장 및 복사. 빈 공간은 null로 패딩
+            }
+            r[i++] = (T)it.next();		
+        }
+        // trim if overallocated
+        return (i == r.length) ? r : Arrays.copyOf(r, i);	//과할당된(null로 패딩된) 부분을 제거하고 반환
+    }
+
+	//VM에 따른 에러 발생 처리 루틴
+    private static int hugeCapacity(int minCapacity) {
+        if (minCapacity < 0) // overflow
+            throw new OutOfMemoryError
+                ("Required array size too large");
+        return (minCapacity > MAX_ARRAY_SIZE) ?
+            Integer.MAX_VALUE :
+            MAX_ARRAY_SIZE;
+    }
+
+
+	//병렬처리로 컬렉션이 iteration 중간에 사이즈가 변경되더라도 안전한 결과를 반환한다.
+	public Object[] toArray() {
+        // Estimate size of array; be prepared to see more or fewer elements
+        Object[] r = new Object[size()];
+        Iterator<E> it = iterator();	//이터레이션 중간에 사이즈가 변경될 수 있음
+        for (int i = 0; i < r.length; i++) {
+            if (! it.hasNext()) 		// 사이즈가 줄어든 경우 지금까지 채운 배열만 반환
+                return Arrays.copyOf(r, i);
+            r[i] = it.next();
+        }
+        return it.hasNext() ? finishToArray(r, it) : r;	//사이즈가 늘어난 경우는 새로운 루틴을 적용
+    }
+	
+}
+
+
+
+
+
+```
+
 
 ## Set
 ```java
