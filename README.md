@@ -197,7 +197,6 @@ public abstract class AbstractCollection<E> implements Collection<E> {
             MAX_ARRAY_SIZE;
     }
 
-
 	//병렬처리로 컬렉션이 iteration 중간에 사이즈가 변경되더라도 안전한 결과를 반환한다.
 	public Object[] toArray() {
         // Estimate size of array; be prepared to see more or fewer elements
