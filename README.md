@@ -156,30 +156,30 @@ public abstract class AbstractCollection<E> implements Collection<E> {
 
 	//이터레이션 중간에 기대했던 사이즈보다 엘레멘트가 늘어난 경우 처리하는 루틴
 	@SuppressWarnings("unchecked")
-    private static <T> T[] finishToArray(T[] r, Iterator<?> it) {
-        int i = r.length;		//배열의 원래 사이즈
-        while (it.hasNext()) {	
-            int cap = r.length;						//캡은 늘어난 배열 사이즈를 의미
-            if (i == cap) {							//배열이 꽉 찬 경우
-                int newCap = cap + (cap >> 1) + 1;	//새로운 배열은 약 1.5배 늘어난 사이즈가 됨
+	private static <T> T[] finishToArray(T[] r, Iterator<?> it) {
+		int i = r.length;		//배열의 원래 사이즈
+		while (it.hasNext()) {	
+			int cap = r.length;						//캡은 늘어난 배열 사이즈를 의미
+			if (i == cap) {							//배열이 꽉 찬 경우
+				int newCap = cap + (cap >> 1) + 1;	//새로운 배열은 약 1.5배 늘어난 사이즈가 됨
                 // overflow-conscious code
-                /*
+				/*
 				1. newCap > Integer.MAX_VALUE(overflow) ===> underflow가 일어나 조건이 참이됨
 				2. MAX_ARRAY_SIZE < newCap <= Integer.MAX_VALUE ===> 연산 결과가 양수로 참이됨
 				*/
-                if (newCap - MAX_ARRAY_SIZE > 0)	
-                    newCap = hugeCapacity(cap + 1);
-			/*
-			newCap이 hugeCapacity에서 Integer.MAX_VALUE를 할당받은 경우 VM이
-			Arrays.copyOf에서 java.lang.OutOfMemoryError를 발생시킨다.
-			따라서 newCap의 최대 크기는 MAX_ARRAY_SIZE로 고정된다.
-			cap은 항상 MAX_ARRAY_SIZE 이하이므로 MAX_ARRAY_SIZE < Integer.MAX_VALUE 라면
-			hugeCapacity에서는 overflow가 일어나지 않지만,
-			MAX_ARRYA_SIZE가 추후 변경될 수도 있는 점이 hugeCapacity에 반영된듯 하다.
-			(minCapacity < 0 부분) 
-			*/
+				if (newCap - MAX_ARRAY_SIZE > 0)	
+					newCap = hugeCapacity(cap + 1);
+					/*
+					newCap이 hugeCapacity에서 Integer.MAX_VALUE를 할당받은 경우 VM이
+					Arrays.copyOf에서 java.lang.OutOfMemoryError를 발생시킨다.
+					따라서 newCap의 최대 크기는 MAX_ARRAY_SIZE로 고정된다.
+					cap은 항상 MAX_ARRAY_SIZE 이하이므로 MAX_ARRAY_SIZE < Integer.MAX_VALUE 라면
+					hugeCapacity에서는 overflow가 일어나지 않지만,
+					MAX_ARRYA_SIZE가 추후 변경될 수도 있는 점이 hugeCapacity에 반영된듯 하다.
+					(minCapacity < 0 부분) 
+					*/
                     
-                r = Arrays.copyOf(r, newCap);		//배열의 크기를 확장 및 복사. 빈 공간은 null로 패딩
+				r = Arrays.copyOf(r, newCap);		//배열의 크기를 확장 및 복사. 빈 공간은 null로 패딩
             }
             r[i++] = (T)it.next();		
         }
@@ -214,24 +214,24 @@ public abstract class AbstractCollection<E> implements Collection<E> {
 	//T[] a의 타입으로 toArray를 수행하여 반환. 다음과 같이 사용할 수 있다.
 	//String[] y = x.toArray(new String[0]); 
 	@SuppressWarnings("unchecked")
-    public <T> T[] toArray(T[] a) {
+	public <T> T[] toArray(T[] a) {
         // Estimate size of array; be prepared to see more or fewer elements
-        int size = size();
-        T[] r = a.length >= size ? a :
+		int size = size();
+		T[] r = a.length >= size ? a :
                   (T[])java.lang.reflect.Array
                   .newInstance(a.getClass().getComponentType(), size);
         Iterator<E> it = iterator();
 
         for (int i = 0; i < r.length; i++) {
             if (! it.hasNext()) { // fewer elements than expected
-	        /*
-		1) a의 크기보다 컬렉션의 크기가 더 작아서 a를 그대로 활용한 경우 
-			-> 마지막 유효하지 않은 엘레멘트만 null로 변경 후 리턴
-		2) 컬렉션 크기가 더 커서 r에 새로 메모리를 할당받고 복사하다가 a의 길이보다 더 길어진 경우
-			-> iterator 길이에 맞춰서 새로 배열을 만들어서 반환
-		3) 컬렉션 크기가 더 커서 r에 새로 메모리를 할당받았는데 a의 길이보다 짧은곳에서 끝난 경우
-			-> r의 내용을 유요한 곳까지 a에 복사한 다음 유효하지 않은 데이터가 시작되는 부분을 null로 마크
-		*/
+	            /*
+				1) a의 크기보다 컬렉션의 크기가 더 작아서 a를 그대로 활용한 경우 
+					-> 마지막 유효하지 않은 엘레멘트만 null로 변경 후 리턴
+				2) 컬렉션 크기가 더 커서 r에 새로 메모리를 할당받고 복사하다가 a의 길이보다 더 길어진 경우
+					-> iterator 길이에 맞춰서 새로 배열을 만들어서 반환
+				3) 컬렉션 크기가 더 커서 r에 새로 메모리를 할당받았는데 a의 길이보다 짧은곳에서 끝난 경우
+					-> r의 내용을 유요한 곳까지 a에 복사한 다음 유효하지 않은 데이터가 시작되는 부분을 null로 마크
+				*/
                 if (a == r) {
                     r[i] = null; // null-terminate
                 } else if (a.length < i) {
