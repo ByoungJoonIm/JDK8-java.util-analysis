@@ -349,6 +349,104 @@ public abstract class AbstractCollection<E> implements Collection<E> {
 }	//the end of AbstractCollection
 ```
 
+## Map
+```java
+public interface Map<K,V> {
+    // key-value 쌍의 수 반환. Integer.MAX_VALUE보다 크면 Integer.MAX_VALUE 반환
+    int size();
+
+    // key-value 쌍이 하나도 없으면 true 반환
+    boolean isEmpty();
+
+    // 현재 맵이 특정 key에 대한 매핑을 가지면 true 반환
+    boolean containsKey(Object key);
+
+    // 특정 값이 존재하면 true 반환. 일반적으로 O(n)이 걸림
+    boolean containsValue(Object value);
+
+    // 특정 key에 매핑되는 value 반환
+    V get(Object key);
+
+    // 특정 키에 대한 특정 값을 할당.
+    V put(K key, V value);
+
+    // 특정 키에 대한 매핑을 삭제
+    V remove(Object key);
+
+    // 특정 map의 모든 매핑을 현재 맵에 복사
+    void putAll(Map<? extends K, ? extends V> m);
+
+/*
+views
+*/
+    // 모든 매핑을 삭제
+    void clear();
+
+    // 이 맵에 대한 모든 키를 셋으로 반환
+    Set<K> keySet();
+
+    // 이 맵에 대한 모든 값을 컬렉션으로 반환
+    Collection<V> values();
+
+    // 이 맵에 대한 모든 매핑을 셋으로 반환
+    Set<Map.Entry<K, V>> entrySet();
+
+/*
+nested Entry interface
+*/    
+    interface Entry<K,V> {
+        // 이 엔트리의 키 반환
+        K getKey();
+
+        // 이 엔트리의 값 반환
+        V getValue();
+
+        // 현재 엔트리의 값을 특정 값으로 대체. 대체되기 전의 값을 반환함
+        V setValue(V value);
+
+        // 현재 엔트리와 특정 엔트리간의 동등성 검사 결과 반환
+        boolean equals(Object o);
+
+        // 현재 엔트리의 해쉬 코드값을 반환
+        int hashCode();
+
+        // key에 대한 natural order(알파벳 순서)인 Comparator 반환
+        public static <K extends Comparable<? super K>, V> Comparator<Map.Entry<K,V>> comparingByKey() {
+            return (Comparator<Map.Entry<K, V>> & Serializable)
+                (c1, c2) -> c1.getKey().compareTo(c2.getKey());
+        }
+        // key에 대한 Comparator를 활용하여 Entry에 대한 Comparator 반환
+        public static <K, V> Comparator<Map.Entry<K, V>> comparingByKey(Comparator<? super K> cmp) {
+            Objects.requireNonNull(cmp);
+            return (Comparator<Map.Entry<K, V>> & Serializable)
+                (c1, c2) -> cmp.compare(c1.getKey(), c2.getKey());
+        }
+
+        // value에 대한 narual order인 Comparator 반환
+        public static <K, V extends Comparable<? super V>> Comparator<Map.Entry<K,V>> comparingByValue() {
+            return (Comparator<Map.Entry<K, V>> & Serializable)
+                (c1, c2) -> c1.getValue().compareTo(c2.getValue());
+        }
+        // value에 대한 Comparator를 활용하여 Entry에 대한 Comparator 반환
+        public static <K, V> Comparator<Map.Entry<K, V>> comparingByValue(Comparator<? super V> cmp) {
+            Objects.requireNonNull(cmp);
+            return (Comparator<Map.Entry<K, V>> & Serializable)
+                (c1, c2) -> cmp.compare(c1.getValue(), c2.getValue());
+        }
+    }
+
+/*
+comparison and hashing
+*/
+
+    // 특정 객체와 이 맵의 동등성 검사
+    boolean equals(Object o);
+
+    // 이 맵에 대한 hash code 값 반환
+    int hashCode();
+
+}
+```
 
 ## Set
 ```java
