@@ -1,4 +1,5 @@
 
+
 # 목차
 - [의미 분석](#의미-분석)
 - [코드 분석](#코드-분석)
@@ -127,6 +128,10 @@ public abstract class AbstractCollection<E> implements Collection<E> {
     //사이즈 반환
     public abstract int size();
 
+	//구현하지 않으면 지원하지 않는다는 예외 발생 
+    public boolean add(E e) {
+        throw new UnsupportedOperationException();
+    }
 /*
 구현부
 */
@@ -197,7 +202,6 @@ public abstract class AbstractCollection<E> implements Collection<E> {
             MAX_ARRAY_SIZE;
     }
 
-
     //병렬처리로 컬렉션이 iteration 중간에 사이즈가 변경되더라도 안전한 결과를 반환한다.
     public Object[] toArray() {
         // Estimate size of array; be prepared to see more or fewer elements
@@ -250,13 +254,99 @@ public abstract class AbstractCollection<E> implements Collection<E> {
         return it.hasNext() ? finishToArray(r, it) : r;
     }
 
+    // iterator로 순차적으로 탐색하다가 발견되면 삭제. 삭제 성공시 true 반환
+    public boolean remove(Object o) {
+        Iterator<E> it = iterator();
+        if (o==null) {
+            while (it.hasNext()) {
+                if (it.next()==null) {
+                    it.remove();
+                    return true;
+                }
+            }
+        } else {
+            while (it.hasNext()) {
+                if (o.equals(it.next())) {
+                    it.remove();
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
 
-}
+    // 내부적으로 contains 함수를 재사용. 현재 컬렉션에 모든 파라미터 컬렉션의 요소가 있을 때만 true 반환
+    public boolean containsAll(Collection<?> c) {
+        for (Object e : c)
+            if (!contains(e))
+                return false;
+        return true;
+    }
 
+    // 파라미터 컬렉션을 모두 현재 컬렉션에 추가. 하나라도 추가된 경우(현재 컬렉션이 변경된 경우) true 반환. 합집합 연산
+    public boolean addAll(Collection<? extends E> c) {
+        boolean modified = false;
+        for (E e : c)
+            if (add(e))
+                modified = true;
+        return modified;
+    }
 
+    // 현재 컬렉션에서 파라미터 컬렉션의 요소 삭제. 하나라도 삭제된 경우 true 반환. 차집합 연산
+    public boolean removeAll(Collection<?> c) {
+        Objects.requireNonNull(c);
+        boolean modified = false;
+        Iterator<?> it = iterator();
+        while (it.hasNext()) {
+            if (c.contains(it.next())) {
+                it.remove();
+                modified = true;
+            }
+        }
+        return modified;
+    }
 
+    // 파라미터 컬렉션과 현재 컬렉션이 공통으로 가진 요소만 남기고 삭제. 현재 컬렉션이 변경되었으면 true 반환. 교집합 연산
+    public boolean retainAll(Collection<?> c) {
+        Objects.requireNonNull(c);
+        boolean modified = false;
+        Iterator<E> it = iterator();
+        while (it.hasNext()) {
+            if (!c.contains(it.next())) {
+                it.remove();
+                modified = true;
+            }
+        }
+        return modified;
+    }
 
+    // 컬렉션의 모든 요소 삭제
+    public void clear() {
+        Iterator<E> it = iterator();
+        while (it.hasNext()) {
+            it.next();
+            it.remove();
+        }
+    }
 
+    // 현재 컬렉션의 모든 요소를 다음과 같은 형태로 반환
+    // "[factor1, factor2, factor3]"
+    public String toString() {
+        Iterator<E> it = iterator();
+        if (! it.hasNext())
+            return "[]";
+
+        StringBuilder sb = new StringBuilder();
+        sb.append('[');
+        for (;;) {
+            E e = it.next();
+            sb.append(e == this ? "(this Collection)" : e);
+            if (! it.hasNext())
+                return sb.append(']').toString();
+            sb.append(',').append(' ');
+        }
+    }
+}	//the end of AbstractCollection
 ```
 
 
@@ -271,4 +361,3 @@ public interface Set<E> extends Collection<E> {
     */
 }
 ```
-
