@@ -128,7 +128,7 @@ public abstract class AbstractCollection<E> implements Collection<E> {
     //사이즈 반환
     public abstract int size();
 
-	//구현하지 않으면 지원하지 않는다는 예외 발생 
+    //구현하지 않으면 지원하지 않는다는 예외 발생 
     public boolean add(E e) {
         throw new UnsupportedOperationException();
     }
@@ -361,3 +361,4 @@ public interface Set<E> extends Collection<E> {
     */
 }
 ```
+
