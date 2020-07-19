@@ -474,7 +474,7 @@ comparison and hashing
 
     // 주어진 function을 모든 엔트리에 대해 수행
     // 모두 수행되거나 exception 발생시까지 수행
-        default void replaceAll(BiFunction<? super K, ? super V, ? extends V> function) {
+    default void replaceAll(BiFunction<? super K, ? super V, ? extends V> function) {
         Objects.requireNonNull(function);
         for (Map.Entry<K, V> entry : entrySet()) {
             K k;
@@ -584,9 +584,9 @@ comparison and hashing
         }
     }
 
-	// 주어진 key에 대한 연산을 수행
-	// 연산의 결과가 null이 아닌 경우 연산 수행 결과를 key에 대한 value로 저장
-	// 연산의 결과가 null인 경우 key에 대한 매핑이 존재 했다면 해당 매핑을 삭제
+    // 주어진 key에 대한 연산을 수행
+    // 연산의 결과가 null이 아닌 경우 연산 수행 결과를 key에 대한 value로 저장
+    // 연산의 결과가 null인 경우 key에 대한 매핑이 존재 했다면 해당 매핑을 삭제
     default V compute(K key,
             BiFunction<? super K, ? super V, ? extends V> remappingFunction) {
         Objects.requireNonNull(remappingFunction);
