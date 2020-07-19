@@ -445,6 +445,187 @@ comparison and hashing
     // 이 맵에 대한 hash code 값 반환
     int hashCode();
 
+    // 이 메소드는 원자성을 보장하지 않으므로, 동기화가 필요하면 override 해야함
+    // key에 대한 매핑이 존재하면 매핑에 대한 value를, 아니면 defaultValue를 반환
+    default V getOrDefault(Object key, V defaultValue) {
+        V v;
+        return (((v = get(key)) != null) || containsKey(key))
+            ? v
+            : defaultValue;
+    }
+
+    // 주어진 action을 모든 엔트리에 대해 수행
+    // 모두 수행되거나 exception 발생시까지 수행
+    default void forEach(BiConsumer<? super K, ? super V> action) {
+        Objects.requireNonNull(action);
+        for (Map.Entry<K, V> entry : entrySet()) {
+            K k;
+            V v;
+            try {
+                k = entry.getKey();
+                v = entry.getValue();
+            } catch(IllegalStateException ise) {
+                // this usually means the entry is no longer in the map.
+                throw new ConcurrentModificationException(ise);
+            }
+            action.accept(k, v);
+        }
+    }
+
+    // 주어진 function을 모든 엔트리에 대해 수행
+    // 모두 수행되거나 exception 발생시까지 수행
+        default void replaceAll(BiFunction<? super K, ? super V, ? extends V> function) {
+        Objects.requireNonNull(function);
+        for (Map.Entry<K, V> entry : entrySet()) {
+            K k;
+            V v;
+            try {
+                k = entry.getKey();
+                v = entry.getValue();
+            } catch(IllegalStateException ise) {
+                // this usually means the entry is no longer in the map.
+                throw new ConcurrentModificationException(ise);
+            }
+
+            // ise thrown from function is not a cme.
+            v = function.apply(k, v);
+
+            try {
+                entry.setValue(v);
+            } catch(IllegalStateException ise) {
+                // this usually means the entry is no longer in the map.
+                throw new ConcurrentModificationException(ise);
+            }
+        }
+    }
+
+    // 특정 key에 대한 매핑이 이미 할당되었거나 해당 key가 null에 매핑되어있을때 key에 대한 value를 덮어씀
+    // 이전 값 반환
+    default V putIfAbsent(K key, V value) {
+        V v = get(key);
+        if (v == null) {
+            v = put(key, value);
+        }
+
+        return v;
+    }
+
+    // 특정 entry 삭제
+    default boolean remove(Object key, Object value) {
+        Object curValue = get(key);
+        // 주어진 key에 대한 value가 주어진 value와 다르거나 특정 key가 아직 할당되지 않았으면 false 반환 및 삭제를 수행하지 않음
+        if (!Objects.equals(curValue, value) ||
+            (curValue == null && !containsKey(key))) {
+            return false;
+        }
+        remove(key);
+        return true;
+    }
+
+    // key에 대한 기존의 value를 새로운 value로 대체
+    default boolean replace(K key, V oldValue, V newValue) {
+        Object curValue = get(key);
+        //값이 변경되지 않거나 매핑이 아직 생성되지 않았으면 false를 반환 및 put 연산을 수행하지 않음
+        if (!Objects.equals(curValue, oldValue) ||
+            (curValue == null && !containsKey(key))) {
+            return false;
+        }
+        put(key, newValue);
+        return true;
+    }
+
+    // key에 대한 value 값을 변경
+    // key에 대한 기존 값 반환
+    // 원자성이나 동기화를 제공하려면 override 해야함
+    default V replace(K key, V value) {
+        V curValue;
+        // key에 대한 value가 null이 아니거나 key가 이미 할당되었을 때 put 연산 수행
+        if (((curValue = get(key)) != null) || containsKey(key)) {
+            curValue = put(key, value);
+        }
+        return curValue;
+    }
+
+    // key에 대한 매핑이 없는 경우에 연산 수행
+    // 새로운 값이 할당된 경우 할당된 값 반환
+    default V computeIfAbsent(K key,
+            Function<? super K, ? extends V> mappingFunction) {
+        Objects.requireNonNull(mappingFunction);
+        V v;
+        if ((v = get(key)) == null) {
+            V newValue;
+            if ((newValue = mappingFunction.apply(key)) != null) {
+                put(key, newValue);
+                return newValue;
+            }
+        }
+
+        return v;
+    }
+
+    // key에 대한 매핑이 있는 경우에 연산 수행
+    // 연산 결과가 null이면 해당 매핑을 삭제 및 null 반환, 존재하지 않는 매핑이어도 null 반환
+    // 새로운 값이 할당된 경우 할당된 값 반환
+    default V computeIfPresent(K key,
+            BiFunction<? super K, ? super V, ? extends V> remappingFunction) {
+        Objects.requireNonNull(remappingFunction);
+        V oldValue;
+        if ((oldValue = get(key)) != null) {
+            V newValue = remappingFunction.apply(key, oldValue);
+            if (newValue != null) {
+                put(key, newValue);
+                return newValue;
+            } else {
+                remove(key);
+                return null;
+            }
+        } else {
+            return null;
+        }
+    }
+
+	// 주어진 key에 대한 연산을 수행
+	// 연산의 결과가 null이 아닌 경우 연산 수행 결과를 key에 대한 value로 저장
+	// 연산의 결과가 null인 경우 key에 대한 매핑이 존재 했다면 해당 매핑을 삭제
+    default V compute(K key,
+            BiFunction<? super K, ? super V, ? extends V> remappingFunction) {
+        Objects.requireNonNull(remappingFunction);
+        V oldValue = get(key);
+
+        V newValue = remappingFunction.apply(key, oldValue);
+        if (newValue == null) {
+            // delete mapping
+            if (oldValue != null || containsKey(key)) {
+                // something to remove
+                remove(key);
+                return null;
+            } else {
+                // nothing to do. Leave things as they were.
+                return null;
+            }
+        } else {
+            // add or replace old mapping
+            put(key, newValue);
+            return newValue;
+        }
+    }
+
+    // 특정 키에 대한 매핑이 할당되지 않았거나, null로 할당되었다면 주어진 null이 아닌 value로 매핑 할당
+    // 그 외에는 할당된 값을 remapping function으로 매핑하거나 결과가 null인 경우는 삭제
+    default V merge(K key, V value,
+            BiFunction<? super V, ? super V, ? extends V> remappingFunction) {
+        Objects.requireNonNull(remappingFunction);
+        Objects.requireNonNull(value);
+        V oldValue = get(key);
+        V newValue = (oldValue == null) ? value :
+                   remappingFunction.apply(oldValue, value);
+        if(newValue == null) {
+            remove(key);
+        } else {
+            put(key, newValue);
+        }
+        return newValue;
+    }
 }
 ```
 
