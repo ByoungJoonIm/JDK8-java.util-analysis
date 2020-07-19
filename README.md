@@ -20,7 +20,7 @@
             - Queue interface
                 - Deque interface
                     - ArrayDeque class
-    - java.util.Map interface
+    - [java.util.Map](#map) interface
         - HashTable class
         - sortedMap interface
             - Navigable interface
@@ -36,6 +36,10 @@
   - 마찬가지로 AbstractSet은 AbstactCollection을 상속한다. AbstractCollection에서는 Collection이기 위한 작업중 미리 정의할 수 있는 작업이 정의되어 있다면, AbstractSet에서는 추가적으로 'Set'이기 위한 미리 정의해 놓을 수 있는 작업을 정의해 놓을 수 있다. 즉, AbstractClass들을 사용하면서 interface의 spec을 구현함에 있어서 최소한의 노력으로 목적에 맞는 코드를 작성할 수 있게 되는 것이다. 
   - interface는 '너가 Collection이라는 성질을 띠려면 이 15개의 메소드는 있어야해!'라는 느낌
   - abstract class는 '너가 Collection이라는 성질을 띠려면 원래 15개의 메소드가 필요한데, 그중에 대부분은 내가 미리 만들어 놓을게! 맘에 안들면 고치고, 넌 그냥 한 5개만 구현하면 충분해!'라는 느낌
+- interface와 abstract class는 어떤 차이가 있을까?
+  - interface는 주 목적이 spec을 기술한 것이라면, abstract class는 기능 구현에 더 중점이 맞춰져 있다.
+  - 하지만 부분적으로 interface에서도 `default` 키워드를 이용하여 기능이 구현된 경우가 있다.
+  - 함수 레벨의 수행(BiFunction)은 interface의 default method로 구현된다.(정확하지 않음)
 
 # 코드 분석
 ## Iterable
