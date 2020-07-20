@@ -942,8 +942,105 @@ comparison and hashing
         return o1 == null ? o2 == null : o1.equals(o2);
     }
 
+/*
+Entry에 대한 구현들
+*/
+    public static class SimpleEntry<K,V> implements Entry<K,V>, java.io.Serializable{
+        private static final long serialVersionUID = 7138329143949025153L;  // 구현에 대한 직렬화 ID. 이 값이 같으면 같은 구조로, 역직렬화가 가능하다는 의미
+        private final K key;	//생성자 호출 이후에는 key 변경 불가
+        private V value;
 
+        // constructors
+        public SimpleEntry(K key, V value) {
+            this.key   = key;
+            this.value = value;
+        }
+        public SimpleEntry(Entry<? extends K, ? extends V> entry) {
+            this.key   = entry.getKey();
+            this.value = entry.getValue();
+        }
 
+        // getter
+        public K getKey() { return key; }
+        public V getValue() return value; }
+
+        // value를 업데이트하고, 기존 value 반환
+        public V setValue(V value) {
+            V oldValue = this.value;
+            this.value = value;
+            return oldValue;
+        }
+
+        // 두 entry의 동등성 검사.
+        /*
+        1. 비교 대상 객체가 Map.Entry에서 파생되지 않았다면 false 반환
+        2. 각 객체의 key와 value가 각각 null인지를 포함하여 동등성 검사 
+        */
+        public boolean equals(Object o) {
+            if (!(o instanceof Map.Entry))
+                return false;
+            Map.Entry<?,?> e = (Map.Entry<?,?>)o;
+            return eq(key, e.getKey()) && eq(value, e.getValue());
+        }
+
+        // 현재 entry의 hash code 값 반환
+        // (key의 hash code value) ^ (value의 hash code value), null인 경우 각 자리는 0
+        public int hashCode() {
+            return (key   == null ? 0 :   key.hashCode()) ^
+                   (value == null ? 0 : value.hashCode());
+        }
+
+        // 현재 entry의 toString값 반환
+        // "key=value" 형식
+        public String toString() {
+            return key + "=" + value;
+        }
+    }
+
+    public static class SimpleImmutableEntry<K,V> implements Entry<K,V>, java.io.Serializable {
+        private static final long serialVersionUID = 7138329143949025153L;
+
+        private final K key;
+        private final V value; // imutable 객체이므로 value도 할당 후 수정 불가
+
+        //constructors
+        public SimpleImmutableEntry(K key, V value) {
+            this.key   = key;
+            this.value = value;
+        }
+        public SimpleImmutableEntry(Entry<? extends K, ? extends V> entry) {
+            this.key   = entry.getKey();
+            this.value = entry.getValue();
+        }
+
+        // getter
+        public K getKey() { return key; }
+        public V getValue() { return value; }
+ 
+        // imutable 객체이므로 지원하지 않는다는 exception 발생
+        public V setValue(V value) {
+            throw new UnsupportedOperationException();
+        }
+
+        // 비교 대상 객체와 같은 entry인지 동등성 검사
+        public boolean equals(Object o) {
+            if (!(o instanceof Map.Entry))
+                return false;
+            Map.Entry<?,?> e = (Map.Entry<?,?>)o;
+            return eq(key, e.getKey()) && eq(value, e.getValue());
+        }
+
+        // 현재 entry의 hash code 값 반환
+        public int hashCode() {
+            return (key   == null ? 0 :   key.hashCode()) ^
+                   (value == null ? 0 : value.hashCode());
+        }
+
+        // 현재 entry의 toString 값 반환
+        public String toString() {
+            return key + "=" + value;
+        }
+    }
 }
 ```
 
