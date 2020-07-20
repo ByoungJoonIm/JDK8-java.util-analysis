@@ -3,31 +3,31 @@
 # 목차
 - [의미 분석](#의미-분석)
 - [코드 분석](#코드-분석)
-    - [java.lang.Iterable](#iterable) interface
-        - [java.util.Collection](#collection) interface
-            - [AbstractCollection](#abstract-class) abstract class
-            - [Set](#set) interface
-                - Abstract set abstract class
-                - HashSet class
-                - LinkedHashSet class
-                - SortedSet interface
-                    - TreeSet class
-            - List interface
-                - ArrayList class
-                - LinkedList class
-                - Vector class
-                    - Stack class
-            - Queue interface
-                - Deque interface
-                    - ArrayDeque class
-    - [java.util.Map](#map) interface
-        - HashTable class
-        - sortedMap interface
-            - Navigable interface
-                - TreeMap class
-        - AbstractMap class
-            - HashMap class
-            - EnumMap class
+  - [java.lang.Iterable](#iterable) interface
+    - [java.util.Collection](#collection) interface
+      - [AbstractCollection](#abstract-class) abstract class
+      - [Set](#set) interface
+        - Abstract set abstract class
+        - HashSet class
+        - LinkedHashSet class
+        - SortedSet interface
+          - TreeSet class
+      - List interface
+        - ArrayList class
+        - LinkedList class
+        - Vector class
+          - Stack class
+      - Queue interface
+        - Deque interface
+          - ArrayDeque class
+  - [java.util.Map](#map) interface
+    - AbstractMap
+      - HashMap class
+      - EnumMap class
+      - HashTable class
+      - sortedMap interface
+        - Navigable interface
+          - TreeMap class      
 
 # 의미 분석
 - interface와 abstract class를 실제로 어떻게 활용할까?
