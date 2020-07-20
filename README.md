@@ -22,7 +22,7 @@
         - Deque interface
           - ArrayDeque class
   - [java.util.Map](#map) interface
-    - AbstractMap
+    - [AbstractMap](#
       - HashMap class
       - EnumMap class
       - HashTable class
