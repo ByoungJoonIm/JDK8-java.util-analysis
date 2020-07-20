@@ -857,13 +857,90 @@ views
 /*
 comparison and hashing
 */
+    // 현재 맵과 다른 객체가 같은 객체인지 판별
+    /*
+    1. 현재 맵과 비교대상 객체가 각각 메모리 주소가 동일하면 true 반환
+    2. 비교 대상 객체가 Map에서 파생된게 아니면 false 반환
+    3. 두 객체의 사이즈가 다르면 false 반환
+    4. 현재 맵을 순회하며 각각의 element 비교
+    */
+    public boolean equals(Object o) {
+        if (o == this)
+            return true;
 
+        if (!(o instanceof Map))
+            return false;
+        Map<?,?> m = (Map<?,?>) o;
+        if (m.size() != size())
+            return false;
 
+        try {
+            Iterator<Entry<K,V>> i = entrySet().iterator();
+            while (i.hasNext()) {
+                Entry<K,V> e = i.next();
+                K key = e.getKey();
+                V value = e.getValue();
+                if (value == null) {
+                    if (!(m.get(key)==null && m.containsKey(key)))
+                        return false;
+                } else {
+                    if (!value.equals(m.get(key)))
+                        return false;
+                }
+            }
+        } catch (ClassCastException unused) {
+            return false;
+        } catch (NullPointerException unused) {
+            return false;
+        }
 
+        return true;
+    }
 
+    // 현재 맵에 대한 hash code 값 반환
+    // hash값은 각각의 엔트리의 해쉬값을 모두 더한 값을 사용
+    public int hashCode() {
+        int h = 0;
+        Iterator<Entry<K,V>> i = entrySet().iterator();
+        while (i.hasNext())
+            h += i.next().hashCode();
+        return h;
+    }    
 
+    // 이 맵에 대한 toString 반환
+    // "{key1=val1, key2=val2, key3=val3}"
+    public String toString() {
+        Iterator<Entry<K,V>> i = entrySet().iterator();
+        if (! i.hasNext())
+            return "{}";
 
+        StringBuilder sb = new StringBuilder();
+        sb.append('{');
+        for (;;) {
+            Entry<K,V> e = i.next();
+            K key = e.getKey();
+            V value = e.getValue();
+            sb.append(key   == this ? "(this Map)" : key);
+            sb.append('=');
+            sb.append(value == this ? "(this Map)" : value);
+            if (! i.hasNext())
+                return sb.append('}').toString();
+            sb.append(',').append(' ');
+        }
+    }
 
+    // 얕은 복사로 key, values는 복사되지 않음
+    protected Object clone() throws CloneNotSupportedException {
+        AbstractMap<?,?> result = (AbstractMap<?,?>)super.clone();
+        result.keySet = null;
+        result.values = null;
+        return result;
+    }
+
+    // 두 객체의 동등성을 검사하는 내부에서만 사용하는 메소드
+    private static boolean eq(Object o1, Object o2) {
+        return o1 == null ? o2 == null : o1.equals(o2);
+    }
 
 
 
